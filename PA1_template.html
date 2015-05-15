@@ -184,7 +184,7 @@ hljs.initHighlightingOnLoad();
 
 <h2>Preliminary Steps : Configuration of execution envirronment</h2>
 
-<p>Set aspects of the locale for the R process.</p>
+<p>Set aspects of the local for the R process. (For none American users)</p>
 
 <pre><code class="r">Sys.setlocale(category = &quot;LC_ALL&quot;, locale = &quot;English&quot;)
 </code></pre>
@@ -192,12 +192,12 @@ hljs.initHighlightingOnLoad();
 <pre><code>## [1] &quot;LC_COLLATE=English_United States.1252;LC_CTYPE=English_United States.1252;LC_MONETARY=English_United States.1252;LC_NUMERIC=C;LC_TIME=English_United States.1252&quot;
 </code></pre>
 
-<p>Initialisation of seed for Random Number Generation</p>
+<p>Initialisation of seed for Random Number Generation.</p>
 
 <pre><code class="r">set.seed(1024)
 </code></pre>
 
-<p>Get information from execution envirronment</p>
+<p>Get information from execution environment:</p>
 
 <pre><code class="r">sessionInfo()
 </code></pre>
@@ -223,7 +223,7 @@ hljs.initHighlightingOnLoad();
 ## [5] grid_3.1.1      Rcpp_0.11.4     stringr_0.6.2   tools_3.1.1
 </code></pre>
 
-<p>Loading libraries utils</p>
+<p>Loading libraries utils:</p>
 
 <pre><code class="r">library(knitr)
 library(plyr)
@@ -252,25 +252,6 @@ library(lattice)
 <pre><code class="r">dfActivity &lt;- read.csv(&quot;./ProjectData/activity.csv&quot;, sep=&quot;,&quot;, header=TRUE, fill = TRUE, quote = &quot;\&quot;&quot;,na.strings = &quot;NA&quot;)
 </code></pre>
 
-<p>Check the content loaded</p>
-
-<pre><code class="r">xt &lt;- xtable(head(dfActivity,5))
-print(xt, type=&#39;html&#39;)
-</code></pre>
-
-<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-
-<!-- Thu Apr 16 22:56:59 2015 -->
-
-<table border=1>
-<tr> <th>  </th> <th> steps </th> <th> date </th> <th> interval </th>  </tr>
-  <tr> <td align="right"> 1 </td> <td align="right">  </td> <td> 2012-10-01 </td> <td align="right">   0 </td> </tr>
-  <tr> <td align="right"> 2 </td> <td align="right">  </td> <td> 2012-10-01 </td> <td align="right">   5 </td> </tr>
-  <tr> <td align="right"> 3 </td> <td align="right">  </td> <td> 2012-10-01 </td> <td align="right">  10 </td> </tr>
-  <tr> <td align="right"> 4 </td> <td align="right">  </td> <td> 2012-10-01 </td> <td align="right">  15 </td> </tr>
-  <tr> <td align="right"> 5 </td> <td align="right">  </td> <td> 2012-10-01 </td> <td align="right">  20 </td> </tr>
-   </table>
-
 <p>Format the column date into a correct format</p>
 
 <pre><code class="r">dfActivity$newdate &lt;- strptime(as.character(dfActivity$date), &quot;%Y-%m-%d&quot;)
@@ -286,25 +267,6 @@ dfActivity$txtdate &lt;- format(dfActivity$newdate, &quot;%d/%m/%Y&quot;)
                       FUN=sum, 
                       na.rm=TRUE)
 </code></pre>
-
-<p>Check the result of calculation</p>
-
-<pre><code class="r">xt &lt;- xtable(head(dfActAgg,5))
-print(xt, type=&#39;html&#39;)
-</code></pre>
-
-<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
-
-<!-- Thu Apr 16 22:57:01 2015 -->
-
-<table border=1>
-<tr> <th>  </th> <th> ActivityDate </th> <th> sumSteps </th>  </tr>
-  <tr> <td align="right"> 1 </td> <td> 2012-10-01 </td> <td align="right">   0 </td> </tr>
-  <tr> <td align="right"> 2 </td> <td> 2012-10-02 </td> <td align="right"> 126 </td> </tr>
-  <tr> <td align="right"> 3 </td> <td> 2012-10-03 </td> <td align="right"> 11352 </td> </tr>
-  <tr> <td align="right"> 4 </td> <td> 2012-10-04 </td> <td align="right"> 12116 </td> </tr>
-  <tr> <td align="right"> 5 </td> <td> 2012-10-05 </td> <td align="right"> 13294 </td> </tr>
-   </table>
 
 <p>Draw the histogram of the total number of steps taken each day and add the mean to the plot.</p>
 
@@ -322,24 +284,14 @@ legend(&quot;topright&quot;, c(&quot;mean&quot;, &quot;median&quot;), lty = c(1,
 
 <p>Calculate and report the mean and median of the total number of steps taken per day</p>
 
-<pre><code class="r">dfActAggMean &lt;- aggregate(data.frame(meanSteps = dfActivity$steps),
-                      by=list(ActivityDate=dfActivity$date),
-                      FUN=mean, 
-                      na.rm=TRUE)
+<pre><code class="r">meanActivity &lt;- round(mean(dfActAgg$sumSteps, na.rm = TRUE),2)
 
-dfActAggMedian &lt;- aggregate(data.frame(medianSteps = dfActivity$steps),
-                      by=list(ActivityDate=dfActivity$date),
-                      FUN=median, 
-                      na.rm=TRUE)
-
-meanActivity &lt;- mean(dfActAggMean$meanSteps, na.rm = TRUE)
-
-medianActivity &lt;- median(dfActAggMedian$medianSteps, na.rm = TRUE)
+medianActivity &lt;- round(median(dfActAgg$sumSteps, na.rm = TRUE),2)
 </code></pre>
 
 <ul>
-<li><p>Mean of activity : 37.3825996</p></li>
-<li><p>Median of activity : 0</p></li>
+<li><p>Mean of activity : 9 354.23</p></li>
+<li><p>Median of activity : 10 395</p></li>
 </ul>
 
 <h2>What is the average daily activity pattern?</h2>
@@ -368,15 +320,31 @@ legend(&quot;topright&quot;, c(&quot;max&quot;), lty = c(1), col = c(&quot;red&q
 
 <p>Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?</p>
 
-<pre><code class="r">dfActAggInt[dfActAggInt$meanSteps==max(dfActAggInt$meanSteps),&quot;ActivityInterval&quot;]
+<pre><code class="r">#dfActAggInt[dfActAggInt$meanSteps==max(dfActAggInt$meanSteps),&quot;ActivityInterval&quot;]
+dfActAggInt[which.max(dfActAggInt$meanSteps),]
 </code></pre>
 
-<pre><code>## [1] 835
+<pre><code>##     ActivityInterval meanSteps
+## 104              835  206.1698
 </code></pre>
 
 <h2>Imputing missing values</h2>
 
 <p>Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)</p>
+
+<ul>
+<li>total number of records : </li>
+</ul>
+
+<pre><code class="r">nrow(dfActivity)
+</code></pre>
+
+<pre><code>## [1] 17568
+</code></pre>
+
+<ul>
+<li>number of Missing Values :</li>
+</ul>
 
 <pre><code class="r">nrow(dfActivity[is.na(dfActivity$steps),])
 </code></pre>
@@ -384,17 +352,7 @@ legend(&quot;topright&quot;, c(&quot;max&quot;), lty = c(1), col = c(&quot;red&q
 <pre><code>## [1] 2304
 </code></pre>
 
-<pre><code class="r">nrow(dfActivity[is.na(dfActivity$date),])
-</code></pre>
-
-<pre><code>## [1] 0
-</code></pre>
-
-<pre><code class="r">nrow(dfActivity[is.na(dfActivity$interval),])
-</code></pre>
-
-<pre><code>## [1] 0
-</code></pre>
+<p>detail on missing values : </p>
 
 <pre><code class="r">dfActNA&lt;-dfActivity[is.na(dfActivity$steps),]
 
@@ -402,10 +360,28 @@ dfActAggCountNA &lt;- count(dfActNA, c(&#39;date&#39;))
 
 dfActAggCountAll &lt;- count(dfActivity, c(&#39;date&#39;))
 
-dfActAggCount  &lt;- merge(x = dfActAggCountNA, y = dfActAggCountAll, by = &quot;date&quot;, all.y = TRUE)
+dfActAggCount  &lt;- merge(x = dfActAggCountNA, y = dfActAggCountAll, by = &quot;date&quot;, all.x = TRUE)
 
-dfActAggCount &lt;- rename(dfActAggCount, c(&quot;freq.x&quot;=&quot;nbNA&quot;, &quot;freq.y&quot;=&quot;nbAll&quot;))
+dfActAggCount &lt;- rename(dfActAggCount, c(&quot;freq.x&quot;=&quot;nbMissingValues&quot;, &quot;freq.y&quot;=&quot;nbAll&quot;))
 </code></pre>
+
+<p>Missing values are distributed like this : </p>
+
+<!-- html table generated in R 3.1.1 by xtable 1.7-4 package -->
+
+<!-- Sat May 16 00:22:45 2015 -->
+
+<table border=1>
+<tr> <th>  </th> <th> date </th> <th> nbMissingValues </th> <th> nbAll </th>  </tr>
+  <tr> <td align="right"> 1 </td> <td> 2012-10-01 </td> <td align="right"> 288 </td> <td align="right"> 288 </td> </tr>
+  <tr> <td align="right"> 2 </td> <td> 2012-10-08 </td> <td align="right"> 288 </td> <td align="right"> 288 </td> </tr>
+  <tr> <td align="right"> 3 </td> <td> 2012-11-01 </td> <td align="right"> 288 </td> <td align="right"> 288 </td> </tr>
+  <tr> <td align="right"> 4 </td> <td> 2012-11-04 </td> <td align="right"> 288 </td> <td align="right"> 288 </td> </tr>
+  <tr> <td align="right"> 5 </td> <td> 2012-11-09 </td> <td align="right"> 288 </td> <td align="right"> 288 </td> </tr>
+  <tr> <td align="right"> 6 </td> <td> 2012-11-10 </td> <td align="right"> 288 </td> <td align="right"> 288 </td> </tr>
+  <tr> <td align="right"> 7 </td> <td> 2012-11-14 </td> <td align="right"> 288 </td> <td align="right"> 288 </td> </tr>
+  <tr> <td align="right"> 8 </td> <td> 2012-11-30 </td> <td align="right"> 288 </td> <td align="right"> 288 </td> </tr>
+   </table>
 
 <p>Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.</p>
 
@@ -419,50 +395,57 @@ dfActAggCount &lt;- rename(dfActAggCount, c(&quot;freq.x&quot;=&quot;nbNA&quot;,
     t
   }
 
+runApplyMedian &lt;- function(xact) { 
+    if(is.na(xact)==TRUE) { 
+        t&lt;- medianActivity 
+      } 
+    else { 
+        t&lt;-xact 
+      } 
+    t
+  }
+
 dfTinyActivity &lt;- dfActivity
 
-for(i in seq_along(dfTinyActivity$steps)) {
-dfTinyActivity$steps[i] &lt;- runApplyMean(dfTinyActivity[i,&quot;steps&quot;])  
-  }
-</code></pre>
-
-<p>Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?</p>
-
-<pre><code class="r">dfTinyActAgg &lt;- aggregate(data.frame(sumSteps = dfTinyActivity$steps),
+dfTinyActAgg &lt;- aggregate(data.frame(sumSteps = dfTinyActivity$steps),
                       by=list(ActivityDate=dfTinyActivity$date),
                       FUN=sum)
 
-hist(dfTinyActAgg$sumSteps,
+for(i in 1:nrow(dfTinyActAgg)) {
+  dfTinyActAgg$sumSteps[i] &lt;- runApplyMean(dfTinyActAgg[i,&quot;sumSteps&quot;])  
+  }
+</code></pre>
+
+<p>Histogram of the total number of steps taken each day with NA filled with the mean</p>
+
+<pre><code class="r">hist(dfTinyActAgg$sumSteps,
      xlab = &#39;number of steps per day&#39;,
      ylab = &#39;Frequency&#39;,
      main = &#39;Frequency of number of Steps per day with NA removed&#39;,
      col=&#39;lightblue&#39;)
 abline(v = mean(dfTinyActAgg$sumSteps), col = &quot;red&quot;, lwd = 2)
-abline(v = median(dfActAgg$sumSteps), col = &quot;blue&quot;, lwd = 2)
+abline(v = median(dfTinyActAgg$sumSteps), col = &quot;blue&quot;, lwd = 2)
 legend(&quot;topright&quot;, c(&quot;mean&quot;, &quot;median&quot;), lty = c(1, 1), col = c(&quot;red&quot;, &quot;blue&quot;))
 </code></pre>
 
-<p><img src="data:image/png;base64,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" alt="plot of chunk HistogramTinySumStep"/> </p>
+<p><img src="data:image/png;base64,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" alt="plot of chunk HistogramTinySumStep"/> </p>
 
-<pre><code class="r">dfTinyActAggMean &lt;- aggregate(data.frame(meanSteps = dfTinyActivity$steps),
-                      by=list(ActivityDate=dfTinyActivity$date),
-                      FUN=mean, 
-                      na.rm=TRUE)
+<p>Calculation of the mean and median total number of steps taken per day.</p>
 
-dfTinyActAggMedian &lt;- aggregate(data.frame(medianSteps = dfTinyActivity$steps),
-                      by=list(ActivityDate=dfTinyActivity$date),
-                      FUN=median, 
-                      na.rm=TRUE)
+<pre><code class="r">meanTinyActivity &lt;-   round(mean(dfTinyActAgg$sumSteps, na.rm = TRUE),2)
 
-meanTinyActivity &lt;- mean(dfActAggMean$meanSteps, na.rm = TRUE)
-
-medianTinyActivity &lt;- median(dfActAggMedian$medianSteps, na.rm = TRUE)
+medianTinyActivity &lt;- round(median(dfTinyActAgg$sumSteps, na.rm = TRUE),2)
 </code></pre>
 
 <ul>
-<li><p>Mean of activity after suppress NA : 37.3825996</p></li>
-<li><p>Median of activity after suppress NA : 0</p></li>
+<li><p>Mean of activity after suppress NA : 10 581.01</p></li>
+<li><p>Median of activity after suppress NA : 10 395</p></li>
 </ul>
+
+<p>We can see that there is no impact on median
+Results are not very different of the first result.
+But now mean and median are very close.
+And the mean is now greater than the median.</p>
 
 <h2>Are there differences in activity patterns between weekdays and weekends?</h2>
 

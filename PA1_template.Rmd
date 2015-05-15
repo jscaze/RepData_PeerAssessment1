@@ -16,22 +16,22 @@ opts_chunk$set(echo=TRUE, results="asis")
 
 ## Preliminary Steps : Configuration of execution envirronment
 
-Set aspects of the locale for the R process.
+Set aspects of the local for the R process. (For none American users)
 ```{r}
 Sys.setlocale(category = "LC_ALL", locale = "English")
 ```
 
-Initialisation of seed for Random Number Generation
+Initialisation of seed for Random Number Generation.
 ```{r setSeed, cache=TRUE}
 set.seed(1024)
 ```
 
-Get information from execution envirronment
+Get information from execution environment:
 ```{r}
 sessionInfo()
 ```
 
-Loading libraries utils
+Loading libraries utils:
 ```{r, , cache=TRUE}
 library(knitr)
 library(plyr)
@@ -56,9 +56,8 @@ Now we read the CSV file
 dfActivity <- read.csv("./ProjectData/activity.csv", sep=",", header=TRUE, fill = TRUE, quote = "\"",na.strings = "NA")
 ```
 
-Check the content loaded
-```{r showtable1,results="asis"}
-xt <- xtable(head(dfActivity,5))
+```{r showtable1,results="hide", echo=FALSE}
+xt <- xtable(head(dfActivity,1))
 print(xt, type='html')
 ```
 
@@ -79,9 +78,8 @@ dfActAgg <- aggregate(data.frame(sumSteps = dfActivity$steps),
                       na.rm=TRUE)
 ```
 
-Check the result of calculation
-```{r showtable2,results="asis"}
-xt <- xtable(head(dfActAgg,5))
+```{r showtable2,results="hide", echo=FALSE}
+xt <- xtable(head(dfActAgg,1))
 print(xt, type='html')
 ```
 
@@ -103,24 +101,15 @@ Calculate and report the mean and median of the total number of steps taken per 
 
 ```{r calculateMean,results="asis"}
 
-dfActAggMean <- aggregate(data.frame(meanSteps = dfActivity$steps),
-                      by=list(ActivityDate=dfActivity$date),
-                      FUN=mean, 
-                      na.rm=TRUE)
+meanActivity <- round(mean(dfActAgg$sumSteps, na.rm = TRUE),2)
 
-dfActAggMedian <- aggregate(data.frame(medianSteps = dfActivity$steps),
-                      by=list(ActivityDate=dfActivity$date),
-                      FUN=median, 
-                      na.rm=TRUE)
+medianActivity <- round(median(dfActAgg$sumSteps, na.rm = TRUE),2)
 
-meanActivity <- mean(dfActAggMean$meanSteps, na.rm = TRUE)
-
-medianActivity <- median(dfActAggMedian$medianSteps, na.rm = TRUE)
 ```
 
-* Mean of activity : `r meanActivity`
+* Mean of activity : `r format(meanActivity, small.mark = " ", big.mark = " ", decimal.mark = ".")`
 
-* Median of activity : `r medianActivity`
+* Median of activity : `r format(medianActivity, small.mark = " ", big.mark = " ", decimal.mark = ".")`
 
 
 ## What is the average daily activity pattern?
@@ -150,30 +139,46 @@ legend("topright", c("max"), lty = c(1), col = c("red"))
 Which 5-minute interval, on average across all the days in the dataset, contains the maximum number of steps?
 
 ```{r}
-dfActAggInt[dfActAggInt$meanSteps==max(dfActAggInt$meanSteps),"ActivityInterval"]
+#dfActAggInt[dfActAggInt$meanSteps==max(dfActAggInt$meanSteps),"ActivityInterval"]
+dfActAggInt[which.max(dfActAggInt$meanSteps),]
 ```
 
 ## Imputing missing values
 
 Calculate and report the total number of missing values in the dataset (i.e. the total number of rows with NAs)
 
+* total number of records : 
+```{r}
+nrow(dfActivity)
+```
+
+* number of Missing Values :
+
 ```{r}
 nrow(dfActivity[is.na(dfActivity$steps),])
+```
 
-nrow(dfActivity[is.na(dfActivity$date),])
 
-nrow(dfActivity[is.na(dfActivity$interval),])
+detail on missing values : 
 
+```{r}
 dfActNA<-dfActivity[is.na(dfActivity$steps),]
 
 dfActAggCountNA <- count(dfActNA, c('date'))
 
 dfActAggCountAll <- count(dfActivity, c('date'))
 
-dfActAggCount  <- merge(x = dfActAggCountNA, y = dfActAggCountAll, by = "date", all.y = TRUE)
+dfActAggCount  <- merge(x = dfActAggCountNA, y = dfActAggCountAll, by = "date", all.x = TRUE)
 
-dfActAggCount <- rename(dfActAggCount, c("freq.x"="nbNA", "freq.y"="nbAll"))
+dfActAggCount <- rename(dfActAggCount, c("freq.x"="nbMissingValues", "freq.y"="nbAll"))
 ```
+
+Missing values are distributed like this : 
+```{r showtable3, results='asis', echo=FALSE}
+xt <- xtable(dfActAggCount)
+print(xt, type='html')
+```
+
 
 Devise a strategy for filling in all of the missing values in the dataset. The strategy does not need to be sophisticated. For example, you could use the mean/median for that day, or the mean for that 5-minute interval, etc.
 
@@ -188,21 +193,31 @@ runApplyMean <- function(xact) {
     t
   }
 
-dfTinyActivity <- dfActivity
-
-for(i in seq_along(dfTinyActivity$steps)) {
-dfTinyActivity$steps[i] <- runApplyMean(dfTinyActivity[i,"steps"])  
+runApplyMedian <- function(xact) { 
+    if(is.na(xact)==TRUE) { 
+        t<- medianActivity 
+      } 
+    else { 
+        t<-xact 
+      } 
+    t
   }
 
-```
-
-Make a histogram of the total number of steps taken each day and Calculate and report the mean and median total number of steps taken per day. Do these values differ from the estimates from the first part of the assignment? What is the impact of imputing missing data on the estimates of the total daily number of steps?
-
-```{r HistogramTinySumStep, fig.height=6}
+dfTinyActivity <- dfActivity
 
 dfTinyActAgg <- aggregate(data.frame(sumSteps = dfTinyActivity$steps),
                       by=list(ActivityDate=dfTinyActivity$date),
                       FUN=sum)
+
+for(i in 1:nrow(dfTinyActAgg)) {
+  dfTinyActAgg$sumSteps[i] <- runApplyMean(dfTinyActAgg[i,"sumSteps"])  
+  }
+
+```
+
+Histogram of the total number of steps taken each day with NA filled with the mean
+
+```{r HistogramTinySumStep, fig.height=6}
 
 hist(dfTinyActAgg$sumSteps,
      xlab = 'number of steps per day',
@@ -210,27 +225,26 @@ hist(dfTinyActAgg$sumSteps,
      main = 'Frequency of number of Steps per day with NA removed',
      col='lightblue')
 abline(v = mean(dfTinyActAgg$sumSteps), col = "red", lwd = 2)
-abline(v = median(dfActAgg$sumSteps), col = "blue", lwd = 2)
+abline(v = median(dfTinyActAgg$sumSteps), col = "blue", lwd = 2)
 legend("topright", c("mean", "median"), lty = c(1, 1), col = c("red", "blue"))
-
-dfTinyActAggMean <- aggregate(data.frame(meanSteps = dfTinyActivity$steps),
-                      by=list(ActivityDate=dfTinyActivity$date),
-                      FUN=mean, 
-                      na.rm=TRUE)
-
-dfTinyActAggMedian <- aggregate(data.frame(medianSteps = dfTinyActivity$steps),
-                      by=list(ActivityDate=dfTinyActivity$date),
-                      FUN=median, 
-                      na.rm=TRUE)
-
-meanTinyActivity <- mean(dfActAggMean$meanSteps, na.rm = TRUE)
-
-medianTinyActivity <- median(dfActAggMedian$medianSteps, na.rm = TRUE)
 ```
 
-* Mean of activity after suppress NA : `r meanTinyActivity`
+Calculation of the mean and median total number of steps taken per day.
 
-* Median of activity after suppress NA : `r medianTinyActivity`
+```{r calcMeanfilledNA,results="asis"}
+meanTinyActivity <-   round(mean(dfTinyActAgg$sumSteps, na.rm = TRUE),2)
+
+medianTinyActivity <- round(median(dfTinyActAgg$sumSteps, na.rm = TRUE),2)
+```
+
+* Mean of activity after suppress NA : `r format(meanTinyActivity, small.mark = " ", big.mark = " ", decimal.mark = ".")`
+
+* Median of activity after suppress NA : `r format(medianTinyActivity, small.mark = " ", big.mark = " ", decimal.mark = ".")`
+
+We can see that there is no impact on median
+Results are not very different of the first result.
+But now mean and median are very close.
+And the mean is now greater than the median.
 
 ## Are there differences in activity patterns between weekdays and weekends?
 
